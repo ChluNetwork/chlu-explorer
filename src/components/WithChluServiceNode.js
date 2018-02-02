@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ChluIPFS from 'chlu-ipfs-support'
 
 export const maxLogLength = 10;
 
@@ -39,8 +40,6 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             warn: x => this.log(messageTypes.WARN, x),
             error: x => this.log(messageTypes.ERROR, x)
         }
-        // Load the huge module at runtime
-        const ChluIPFS = await import('chlu-ipfs-support')
         const chluIpfs = new ChluIPFS({ type: ChluIPFS.types.service, logger })
         await chluIpfs.start()
         const { id } = await chluIpfs.instance.ipfs.id()
