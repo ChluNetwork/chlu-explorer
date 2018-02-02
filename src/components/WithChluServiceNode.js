@@ -1,10 +1,16 @@
 import React, { Component } from 'react'
-import ChluIPFS from 'chlu-ipfs-support'
 
-const maxLogLength = 10;
+export const maxLogLength = 10;
 
-function getLogItemKey() {
-    return Date.now() + Math.random()
+export const messageTypes = {
+    DEBUG: 'Debug Message',
+    INFO: 'Information',
+    WARN: 'Warning',
+    ERROR: 'Error',
+}
+
+function getTime() {
+    return Date.now()
 }
 
 function trimArray(array, maxLength) {
@@ -16,25 +22,31 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     constructor(props){
         super(props)
         this.state = {
+            debugLog: [],
             eventLog: [],
             peers: [],
-            dbs: []
+            ipfsPeers: [],
+            dbs: [],
+            counter: 0,
+            loading: true
         }
     }
 
     async componentDidMount() {
         const logger = {
-            debug: x => this.log('Debug', x),
-            info: x => this.log('Info', x),
-            warn: x => this.log('Warning', x),
-            error: x => this.log('ERROR', x)
+            debug: x => this.log(messageTypes.DEBUG, x),
+            info: x => this.log(messageTypes.INFO, x),
+            warn: x => this.log(messageTypes.WARN, x),
+            error: x => this.log(messageTypes.ERROR, x)
         }
+        // Load the huge module at runtime
+        const ChluIPFS = await import('chlu-ipfs-support')
         const chluIpfs = new ChluIPFS({ type: ChluIPFS.types.service, logger })
         await chluIpfs.start()
         const { id } = await chluIpfs.instance.ipfs.id()
         chluIpfs.instance.room.room.on('message', this.handleMessage.bind(this))
         const interval = setInterval(this.poll.bind(this), 1000)
-        this.setState({ chluIpfs, id, interval })
+        this.setState({ chluIpfs, id, interval, loading: false })
     }
 
     async componentWillUnmount() {
@@ -44,10 +56,12 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     }
 
     log(type, msg) {
-        const { eventLog } = this.state
-        const item = { type, msg, key: getLogItemKey() }
+        const { debugLog, counter } = this.state
+        const time = getTime();
+        const item = { type, msg, key: counter, time }
         this.setState({
-            eventLog: trimArray(eventLog.concat(item), maxLogLength)
+            debugLog: trimArray([item].concat(debugLog), maxLogLength),
+            counter: counter + 1
         })
     }
 
@@ -61,16 +75,19 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             }
         })
         const peers = src.room.room.getPeers()
-        this.setState({ dbs, peers })
+        const ipfsPeers = src.ipfs.bitswap.stat().peers || []
+        this.setState({ dbs, peers, ipfsPeers })
     }
 
     async handleMessage(message) {
-        const { eventLog } = this.state;
+        const { eventLog, counter } = this.state;
         try {
             const msg = JSON.parse(message.data.toString())
-            msg.key = getLogItemKey()
+            msg.time = getTime()
+            msg.key = counter
             this.setState({
-                eventLog: trimArray(eventLog.concat(msg), maxLogLength)
+                counter: counter + 1,
+                eventLog: trimArray([msg].concat(eventLog), maxLogLength)
             })
         } catch (error) {
             console.log('error', error)
@@ -81,10 +98,13 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         return <ComposedComponent
             {...this.props}
             chluIpfs={this.state.chluIpfs}
+            loading={this.state.loading}
             dbs={this.state.dbs}
             id={this.state.id}
             eventLog={this.state.eventLog}
+            debugLog={this.state.debugLog}
             peers={this.state.peers}
+            ipfsPeers={this.state.peers}
         />
     }
 }
