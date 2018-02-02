@@ -2,14 +2,20 @@
   "name": "chlu-dashboard",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
+    "chlu-ipfs-support": "https://github.com/ChluNetwork/chlu-ipfs-support#review-updates",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.1.0"
+    "react-scripts": "1.1.0",
+    "semantic-ui-css": "^2.2.14",
+    "semantic-ui-react": "^0.77.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "prebuild": "cp webpack.config.prod.js node_modules/react-scripts/config",
+    "postbuild": "npx uglify-es build/static/js/main.*.js -o build/static/js/$(ls build/static/js | head -n 1)",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
