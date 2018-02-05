@@ -17,10 +17,10 @@ class App extends Component {
     const { reviewRecords, debugLog, peers, ipfsPeers, dbs, id, loading, storeExampleReviewRecord } = this.props
     return (
       <Container>
-        <Header as='h2' icon textAlign='center'>
+        <Header as='h2' icon textAlign='center' style={{marginTop:'1rem'}}>
           <Icon name='settings' circular />
           <Header.Content>
-            Chlu Dashboard
+            Chlu Explorer
           </Header.Content>
         </Header>
         <Grid centered columns={3}>
