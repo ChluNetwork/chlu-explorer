@@ -1,14 +1,20 @@
 import React, { Component } from 'react';
-import WithChluServiceNode from './components/WithChluServiceNode'
-import EventLog from './components/EventLog'
-import Event from './components/Event'
+import WithChluServiceNode, { messageTypes } from './components/WithChluServiceNode'
+import ReviewRecords from './components/ReviewRecords'
 import Stats from './components/Stats'
-import { Dimmer, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
+import { Dimmer, Button, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
+import EventLog from './components/EventLog'
 import InternalEvent from './components/InternalEvent';
+
+const visibleMessageTypes = [
+  messageTypes.INFO,
+  messageTypes.WARN,
+  messageTypes.ERROR
+]
 
 class App extends Component {
   render() {
-    const { eventLog, debugLog, peers, ipfsPeers, dbs, id, loading } = this.props
+    const { reviewRecords, debugLog, peers, ipfsPeers, dbs, id, loading, storeExampleReviewRecord } = this.props
     return (
       <Container>
         <Header as='h2' icon textAlign='center'>
@@ -22,13 +28,14 @@ class App extends Component {
             <Dimmer active={loading} inverted style={{marginTop:'2rem'}}>
               <Loader inverted>Connecting to Chlu</Loader>
             </Dimmer>
-            <EventLog eventLog={eventLog} Component={Event} />
+            <ReviewRecords reviewRecords={reviewRecords} />
             <Rail position='left'>
               <Stats dbCount={dbs.length} peerCount={peers.length} ipfsPeerCount={ipfsPeers.length} id={id} />
+              <Button fluid onClick={storeExampleReviewRecord} style={{marginTop:'1.5rem'}}>Create Fake Review Record</Button>
             </Rail>
             <Rail position='right'>
               <Segment>
-                <EventLog eventLog={debugLog} Component={InternalEvent} />
+                <EventLog eventLog={debugLog} types={visibleMessageTypes} Component={InternalEvent}/>
               </Segment>
             </Rail>
           </Grid.Column>

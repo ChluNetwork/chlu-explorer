@@ -1,8 +1,18 @@
 import React from 'react'
 import { List } from 'semantic-ui-react'
 
-export default function EventLog ({ eventLog, Component }) {
+function getFilterByType(types) {
+    return function(item){
+        return types.indexOf(item.type) >= 0
+    }
+}
+
+export default function EventLog ({ eventLog, types, Component }) {
+    let log = eventLog
+    if (Array.isArray(types)) {
+        log = log.filter(getFilterByType(types))
+    }
     return <List divided relaxed>
-        {eventLog.map(event => <Component {...event} />)}
+        {log.map(event => <Component {...event} />)}
     </List>
 }

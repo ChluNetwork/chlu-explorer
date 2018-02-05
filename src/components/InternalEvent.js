@@ -9,14 +9,14 @@ export default function InternalEvent({ type, time, msg }) {
         [messageTypes.DEBUG]: 'settings',
         [messageTypes.WARN]: 'warning',
         [messageTypes.ERROR]: 'error',
-        [messageTypes.INFO]: 'alert',
+        [messageTypes.INFO]: 'alarm',
     }
     return <List.Item>
         <List.Icon name={icons[type] || 'comment'} size='large' verticalAlign='middle' />
         <List.Content>
           <List.Header>{type}</List.Header>
           <List.Description>{timeStr}</List.Description>
-          <List.Description>{msg}</List.Description>
+          <List.Description style={{wordBreak:'break-all'}}>{msg}</List.Description>
         </List.Content>
       </List.Item>
 }
