@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "chlu-ipfs-support": "https://github.com/ChluNetwork/chlu-ipfs-support#review-updates",
+    "chlu-ipfs-support": "https://github.com/ChluNetwork/chlu-ipfs-support",
     "moment": "^2.20.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
