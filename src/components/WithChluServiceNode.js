@@ -27,6 +27,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             eventLog: [],
             peers: [],
             ipfsPeers: [],
+            bitswapPeers: [],
             dbs: [],
             counter: 0,
             reviewRecords: [],
@@ -77,8 +78,9 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             }
         })
         const peers = src.room.room.getPeers()
-        const ipfsPeers = src.ipfs.bitswap.stat().peers || []
-        this.setState({ dbs, peers, ipfsPeers })
+        const ipfsPeers = await src.ipfs.swarm.peers()
+        const bitswapPeers = src.ipfs.bitswap.stat().peers || []
+        this.setState({ dbs, peers, ipfsPeers, bitswapPeers })
     }
 
     async handleMessage(message) {
@@ -172,7 +174,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             eventLog={this.state.eventLog}
             debugLog={this.state.debugLog}
             peers={this.state.peers}
-            ipfsPeers={this.state.peers}
+            ipfsPeers={this.state.ipfsPeers}
+            bitswapPeers={this.state.bitswapPeers}
             reviewRecords={this.state.reviewRecords}
             readReviewRecord={this.readReviewRecord.bind(this)}
             storeExampleReviewRecord={this.storeExampleReviewRecord.bind(this)}
