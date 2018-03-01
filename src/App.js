@@ -4,7 +4,8 @@ import ReviewRecords from './components/ReviewRecords'
 import Stats from './components/Stats'
 import { Dimmer, Button, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
 import EventLog from './components/EventLog'
-import InternalEvent from './components/InternalEvent';
+import Form from './components/Form'
+import InternalEvent from './components/InternalEvent'
 
 const visibleMessageTypes = [
   messageTypes.INFO,
@@ -14,7 +15,18 @@ const visibleMessageTypes = [
 
 class App extends Component {
   render() {
-    const { reviewRecords, debugLog, peers, ipfsPeers, dbs, id, loading, storeExampleReviewRecord } = this.props
+    const {
+      reviewRecords,
+      readReviewRecord,
+      debugLog,
+      peers,
+      ipfsPeers,
+      bitswapPeers,
+      dbs,
+      id,
+      loading,
+      storeExampleReviewRecord
+    } = this.props
     return (
       <Container>
         <Header as='h2' icon textAlign='center' style={{marginTop:'1rem'}}>
@@ -28,9 +40,10 @@ class App extends Component {
             <Dimmer active={loading} inverted style={{marginTop:'2rem'}}>
               <Loader inverted>Connecting to Chlu</Loader>
             </Dimmer>
+            { !loading && <Form onSubmit={fields => readReviewRecord(fields.multihash)} style={{marginBottom:'1.5em'}}/> }
             <ReviewRecords reviewRecords={reviewRecords} />
             <Rail position='left'>
-              <Stats dbCount={dbs.length} peerCount={peers.length} ipfsPeerCount={ipfsPeers.length} id={id} />
+              <Stats dbCount={dbs.length} peerCount={peers.length} ipfsPeerCount={ipfsPeers.length} bitswapPeerCount={bitswapPeers.length} id={id} />
               <Button fluid onClick={storeExampleReviewRecord} style={{marginTop:'1.5rem'}}>Create Fake Review Record</Button>
             </Rail>
             <Rail position='right'>
