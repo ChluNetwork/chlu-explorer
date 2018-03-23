@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Button } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
-import ReviewRecord from './ReviewRecord'
+import ReviewRecordDetail from './ReviewRecordDetail'
 import Loading from './Loading'
 
 export default class ReviewRecordLoader extends Component {
@@ -25,8 +25,8 @@ export default class ReviewRecordLoader extends Component {
         } else {
             return <div>
                 <div style={{margin:'1em auto',textAlign:'center'}}>Viewing single review</div>
-                <ReviewRecord big multihash={multihash} {...reviewRecord} />
-                <Button as={Link} to={'/'} fluid icon='home' content='Home'/>
+                <ReviewRecordDetail multihash={multihash} {...reviewRecord} />
+                <Button as={Link} to={'/'} fluid icon='home' content='Home' style={{marginTop:'1.5em'}}/>
             </div>
         }
     }
