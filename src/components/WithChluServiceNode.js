@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import ChluIPFS from 'chlu-ipfs-support/src'
+import ChluIPFS from 'chlu-ipfs-support'
 
 export const maxLogLength = 50;
 
@@ -123,6 +123,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
                 })
             } catch (error) {
                 console.log('Error while reading RR:', error)
+                console.trace(error);
             }
         }
     }

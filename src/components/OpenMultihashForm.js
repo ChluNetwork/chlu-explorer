@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Form } from 'semantic-ui-react';
 
-export default class ReadReviewRecordForm extends Component {
+export default class OpenMultihashForm extends Component {
     constructor(props){
         super(props)
         this.state = {
