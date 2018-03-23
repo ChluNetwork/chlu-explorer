@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import WithChluServiceNode, { messageTypes } from './components/WithChluServiceNode'
 import ReviewRecords from './components/ReviewRecords'
 import Stats from './components/Stats'
-import { Dimmer, Button, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
+import { Dimmer, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
 import EventLog from './components/EventLog'
 import Form from './components/Form'
 import InternalEvent from './components/InternalEvent'
@@ -17,15 +17,14 @@ class App extends Component {
   render() {
     const {
       reviewRecords,
+      reviewRecordList,
       readReviewRecord,
       debugLog,
       peers,
       ipfsPeers,
       bitswapPeers,
-      dbs,
       id,
-      loading,
-      storeExampleReviewRecord
+      loading
     } = this.props
     return (
       <Container>
@@ -43,8 +42,13 @@ class App extends Component {
             { !loading && <Form onSubmit={fields => readReviewRecord(fields.multihash)} style={{marginBottom:'1.5em'}}/> }
             <ReviewRecords reviewRecords={reviewRecords} />
             <Rail position='left'>
-              <Stats dbCount={dbs.length} peerCount={peers.length} ipfsPeerCount={ipfsPeers.length} bitswapPeerCount={bitswapPeers.length} id={id} />
-              <Button fluid onClick={storeExampleReviewRecord} style={{marginTop:'1.5rem'}}>Create Fake Review Record</Button>
+              <Stats
+                reviewRecordList={reviewRecordList}
+                peerCount={peers.length}
+                ipfsPeerCount={ipfsPeers.length}
+                bitswapPeerCount={bitswapPeers.length}
+                id={id}
+              />
             </Rail>
             <Rail position='right'>
               <Segment>

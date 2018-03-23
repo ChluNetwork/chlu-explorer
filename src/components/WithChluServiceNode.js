@@ -31,6 +31,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             dbs: [],
             counter: 0,
             reviewRecords: [],
+            reviewRecordList: [],
             loading: true
         }
     }
@@ -46,9 +47,17 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
         const { id } = await chluIpfs.instance.ipfs.id()
-        chluIpfs.instance.room.room.on('message', this.handleMessage.bind(this))
+        this.setState({ chluIpfs, id, loading: false }, this.init.bind(this))
+    }
+
+    async init() {
+        await this.poll()
+        await this.refreshReviewRecords()
+        const chluIpfs = this.state.chluIpfs
+        chluIpfs.instance.events.on('message', this.handleMessage.bind(this))
+        chluIpfs.instance.events.on('replicated', this.refreshReviewRecords.bind(this))
         const interval = setInterval(this.poll.bind(this), 1000)
-        this.setState({ chluIpfs, id, interval, loading: false })
+        this.setState({ interval });
         this.log(messageTypes.INFO, 'Chlu Dashboard is ready')
     }
 
@@ -71,29 +80,28 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     async poll() {
         const { chluIpfs } = this.state;
         const src = chluIpfs.instance;
-        const dbs = Object.keys(src.dbs || {}).map(address => {
-            // TODO: collect db information
-            return {
-                address
-            }
-        })
-        const peers = src.room.room.getPeers()
+        const peers = await src.room.getPeers()
         const ipfsPeers = await src.ipfs.swarm.peers()
-        const bitswapPeers = src.ipfs.bitswap.stat().peers || []
-        this.setState({ dbs, peers, ipfsPeers, bitswapPeers })
+        const bitswapPeers = (await src.ipfs.bitswap.stat()).peers || []
+        const reviewRecordList = await src.orbitDb.getReviewRecordList();
+        this.setState({ peers, ipfsPeers, bitswapPeers, reviewRecordList })
     }
 
-    async handleMessage(message) {
+    async refreshReviewRecords() {
+        const list = await this.state.chluIpfs.instance.orbitDb.getReviewRecordList()
+        await Promise.all(list.map(h => this.readReviewRecord(h)))
+    }
+
+    async handleMessage(msg) {
         const { eventLog, counter } = this.state;
         try {
-            const msg = JSON.parse(message.data.toString())
             msg.time = getTime()
             msg.key = counter
             this.setState({
                 counter: counter + 1,
                 eventLog: trimArray([msg].concat(eventLog), maxLogLength)
             })
-            if (msg.multihash && msg.type === 'PINNED') {
+            if (msg.multihash && msg.type === 'WROTE_REVIEW_RECORD') {
                 this.readReviewRecord(msg.multihash)
             }
         } catch (error) {
@@ -105,7 +113,9 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         const { chluIpfs, reviewRecords } = this.state
         if (reviewRecords.filter(r => r.multihash === multihash).length === 0) {
             try {
-                const reviewRecord = await chluIpfs.readReviewRecord(multihash)
+                const reviewRecord = await chluIpfs.readReviewRecord(multihash, {
+                    getLatestVersion: true
+                })
                 reviewRecord.multihash = multihash
                 reviewRecord.time = getTime()
                 this.setState({
@@ -114,53 +124,6 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             } catch (error) {
                 console.log('Error while reading RR:', error)
             }
-        }
-    }
-
-    async storeExampleReviewRecord() {
-        const amount = parseInt(Math.random() * 10000 + 10, 10)
-        const rating = parseInt(Math.random() + 4 + 1, 10)
-        const reviewRecord = {
-            currency_symbol: 'USD',
-            amount,
-            customer_address: 'customer_address',
-            vendor_address: 'vendor_address',
-            review_text: 'it was a really nice item',
-            rating,
-            detailed_review: [],
-            popr: {
-                item_id: 'item_id',
-                invoice_id: 'invoice_id',
-                customer_id: 'customer_id',
-                created_at: 12345,
-                expires_at: 34567,
-                currency_symbol: 'USD',
-                amount,
-                marketplace_url: 'chlu.io',
-                marketplace_vendor_url: 'chlu.io',
-                key_location: '/ipfs/url',
-                chlu_version: 0,
-                attributes: [
-                    {
-                        name: 'score',
-                        min_rating: 1,
-                        max_rating: 5,
-                        description: 'rating',
-                        is_required: true
-                    }
-                ],
-                signature: '-'
-            },
-            orbitDb: '/orbitdb/ipfshash/chlu-experimental-customer-review-updates',
-            last_reviewrecord_multihash: '',
-            chlu_version: 0,
-            hash: '-'
-        }
-        const { chluIpfs } = this.state 
-        try {
-            await chluIpfs.storeReviewRecord(reviewRecord)
-        } catch (error) {
-            console.log('ERROR', error)
         }
     }
 
@@ -177,8 +140,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             ipfsPeers={this.state.ipfsPeers}
             bitswapPeers={this.state.bitswapPeers}
             reviewRecords={this.state.reviewRecords}
+            reviewRecordList={this.state.reviewRecordList}
             readReviewRecord={this.readReviewRecord.bind(this)}
-            storeExampleReviewRecord={this.storeExampleReviewRecord.bind(this)}
         />
     }
 }

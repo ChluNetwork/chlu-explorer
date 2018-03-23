@@ -8,7 +8,7 @@ export default function InternalEvent({ type, time, msg }) {
     const icons = {
         [messageTypes.DEBUG]: 'settings',
         [messageTypes.WARN]: 'warning',
-        [messageTypes.ERROR]: 'error',
+        [messageTypes.ERROR]: 'ban',
         [messageTypes.INFO]: 'alarm',
     }
     return <List.Item>

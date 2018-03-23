@@ -1,7 +1,8 @@
 import React from 'react'
 import { Card, Icon } from 'semantic-ui-react'
 
-export default function Stats({ dbCount, peerCount, ipfsPeerCount, bitswapPeerCount, id }) {
+export default function Stats({ reviewRecordList, dbCount, peerCount, ipfsPeerCount, bitswapPeerCount, id }) {
+    const reviewRecordCount = reviewRecordList.length
     return <Card.Group>
         <Card>
             <Card.Content>
@@ -16,6 +17,8 @@ export default function Stats({ dbCount, peerCount, ipfsPeerCount, bitswapPeerCo
             </Card.Content>
             <Card.Content extra>
                 <Icon name="user" /> {peerCount} nodes
+                <br/>
+                <Icon name="file" /> {reviewRecordCount} reviews
             </Card.Content>
         </Card> 
         <Card>
