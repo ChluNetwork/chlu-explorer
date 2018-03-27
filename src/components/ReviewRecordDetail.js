@@ -8,11 +8,13 @@ export default function ReviewRecord(props) {
         <Card fluid>
             <Card.Content>
                 <Card.Header>Review Record</Card.Header>
-                <Card.Meta style={{wordBreak:'break-all'}}>{props.multihash}</Card.Meta>
+                <Card.Meta style={{wordBreak:'break-all'}}>{props.requestedMultihash}</Card.Meta>
             </Card.Content>
             <Card.Content>
-                <Icon name="history" /> Previous version
-                <br/>{props.previous_version_multihash || 'None'}
+                <Icon name="code" /> Latest Version
+                <br/><span style={{wordBreak:'break-all'}}>{props.multihash}</span>
+                <br/><Icon name="history" /> Previous Version
+                <br/><span style={{wordBreak:'break-all'}}>{props.previous_version_multihash || 'None'}</span>
             </Card.Content>
         </Card>
         <Card fluid>

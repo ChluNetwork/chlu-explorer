@@ -13,6 +13,6 @@ export default function EventLog ({ eventLog, types, Component }) {
         log = log.filter(getFilterByType(types))
     }
     return <List divided relaxed>
-        {log.map(event => <Component {...event} />)}
+        {log.slice(-10).map(event => <Component {...event} />)}
     </List>
 }

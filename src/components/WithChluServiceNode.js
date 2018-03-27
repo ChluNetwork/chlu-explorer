@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import ChluIPFS from 'chlu-ipfs-support'
 
-export const maxLogLength = 50;
+export const maxLogLength = 500;
 
 export const messageTypes = {
     DEBUG: 'Debug Message',
@@ -30,7 +30,6 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             bitswapPeers: [],
             dbs: [],
             counter: 0,
-            reviewRecords: [],
             reviewRecordList: [],
             loading: true
         }
@@ -58,7 +57,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         chluIpfs.instance.events.on('replicated', this.refreshReviewRecords.bind(this))
         const interval = setInterval(this.poll.bind(this), 1000)
         this.setState({ interval });
-        this.log(messageTypes.INFO, 'Chlu Dashboard is ready')
+        this.log(messageTypes.INFO, 'Chlu Explorer is ready')
     }
 
     async componentWillUnmount() {
@@ -88,8 +87,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     }
 
     async refreshReviewRecords() {
-        const list = await this.state.chluIpfs.instance.orbitDb.getReviewRecordList()
-        await Promise.all(list.map(h => this.readReviewRecord(h)))
+        const reviewRecordList = await this.state.chluIpfs.instance.orbitDb.getReviewRecordList()
+        this.setState({ reviewRecordList })
     }
 
     async handleMessage(msg) {
@@ -101,30 +100,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
                 counter: counter + 1,
                 eventLog: trimArray([msg].concat(eventLog), maxLogLength)
             })
-            if (msg.multihash && msg.type === 'WROTE_REVIEW_RECORD') {
-                this.readReviewRecord(msg.multihash)
-            }
         } catch (error) {
             console.log('error', error)
-        }
-    }
-
-    async readReviewRecord(multihash) {
-        const { chluIpfs, reviewRecords } = this.state
-        if (reviewRecords.filter(r => r.multihash === multihash).length === 0) {
-            try {
-                const reviewRecord = await chluIpfs.readReviewRecord(multihash, {
-                    getLatestVersion: true
-                })
-                reviewRecord.multihash = multihash
-                reviewRecord.time = getTime()
-                this.setState({
-                    reviewRecords: trimArray([reviewRecord].concat(reviewRecords), 100)
-                })
-            } catch (error) {
-                console.log('Error while reading RR:', error)
-                console.trace(error);
-            }
         }
     }
 
@@ -140,9 +117,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             peers={this.state.peers}
             ipfsPeers={this.state.ipfsPeers}
             bitswapPeers={this.state.bitswapPeers}
-            reviewRecords={this.state.reviewRecords}
             reviewRecordList={this.state.reviewRecordList}
-            readReviewRecord={this.readReviewRecord.bind(this)}
         />
     }
 }

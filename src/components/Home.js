@@ -1,13 +1,17 @@
 import React from 'react'
-import ReviewRecords from './ReviewRecords'
+import ReviewRecordsPaged from './ReviewRecordsPaged'
 import OpenMultihashForm from './OpenMultihashForm'
 
-export default function Home ({ reviewRecords, history }) {
+export default function Home ({ reviewRecords, history, chluIpfs }) {
     return <div>
         <OpenMultihashForm
             onSubmit={fields => history.push('/v/' + fields.multihash)}
             style={{marginBottom:'1em'}}
         />
-        <ReviewRecords reviewRecords={reviewRecords} />
+        <ReviewRecordsPaged
+            reviewRecords={reviewRecords}
+            chluIpfs={chluIpfs}
+            style={{marginTop:'1em'}}
+        />
     </div>
 }
