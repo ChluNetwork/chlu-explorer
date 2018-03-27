@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Icon, Rating, Button } from 'semantic-ui-react'
 
-export default function ReviewRecord(props) {
+export default function ReviewRecord({ error, ...props }) {
     const reviewEmpty = !(props.rating > 0 || props.review_text)
     return <Card.Group>
         <Card fluid>
@@ -10,14 +10,17 @@ export default function ReviewRecord(props) {
                 <Card.Header>Review Record</Card.Header>
                 <Card.Meta style={{wordBreak:'break-all'}}>{props.requestedMultihash}</Card.Meta>
             </Card.Content>
-            <Card.Content>
+            {!error && <Card.Content>
                 <Icon name="code" /> Latest Version
                 <br/><span style={{wordBreak:'break-all'}}>{props.multihash}</span>
                 <br/><Icon name="history" /> Previous Version
                 <br/><span style={{wordBreak:'break-all'}}>{props.previous_version_multihash || 'None'}</span>
-            </Card.Content>
+            </Card.Content> }
+            {error && <Card.Content style={{wordBreak:'break-all'}}>
+                <Icon name="ban" /> {error.message || error}
+            </Card.Content> }
         </Card>
-        <Card fluid>
+        {!error && <Card fluid>
             <Card.Content>
                 <Card.Header>Review Data</Card.Header>
                 {reviewEmpty && <Card.Meta>Empty</Card.Meta>}
@@ -30,8 +33,8 @@ export default function ReviewRecord(props) {
                 <Icon name="comment" /> Comment
                 <br/>{props.review_text || '(no comment left)'}
             </Card.Content>}
-        </Card>
-        <Card fluid>
+        </Card> }
+        {!error && <Card fluid>
             <Card.Content>
                 <Card.Header>Payment</Card.Header>
                 <Card.Meta>Payed with {props.currency_symbol}</Card.Meta>
@@ -44,6 +47,6 @@ export default function ReviewRecord(props) {
                 <br/><Icon name="payment" /> Amount
                 <br/>{props.amount + ' ' + props.currency_symbol}
             </Card.Content>
-        </Card>
+        </Card> }
     </Card.Group>
 }

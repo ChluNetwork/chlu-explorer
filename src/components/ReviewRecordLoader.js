@@ -19,19 +19,27 @@ export default class ReviewRecordLoader extends Component {
     render() {
         const { loading, reviewRecord, error } = this.state
         const { multihash, short = false } = this.props
-        if (error) {
-            return <div style={{margin:'1em auto'}}>{error.message || error}</div>
-        } else if (short) {
-            return <ReviewRecordShort loading={loading} {...reviewRecord} />
-        } else if (loading) {
+        if (short) {
+            return <ReviewRecordShort error={error} loading={loading} {...reviewRecord} />
+        } else if (loading && !error) {
             return <Loading loading={true} message={'Fetching Review'} />
-        }  else {
+        } else {
             return <div>
                 <div style={{margin:'1em auto',textAlign:'center'}}>Viewing single review</div>
-                <ReviewRecordDetail {...reviewRecord} />
+                <ReviewRecordDetail error={error} {...reviewRecord} />
                 <Button as={Link} to={'/'} fluid icon='home' content='Home' style={{marginTop:'1.5em'}}/>
             </div>
         }
+    }
+
+    async reset() {
+        return await new Promise(resolve => {
+            this.setState({
+                loading: true,
+                error: null,
+                reviewRecord: {}
+            }, resolve)
+        })
     }
 
     async fetch() {
@@ -42,12 +50,12 @@ export default class ReviewRecordLoader extends Component {
             })
             this.setState({ reviewRecord, loading: false })
         } catch (error) {
-            this.setState({ error })
+            this.setState({ error, loading: false })
         }
     }
 
     componentWillReceiveProps(next) {
-        if (this.props.multihash !== next.multihash) this.fetch()
+        if (this.props.multihash !== next.multihash) this.reset().then(this.fetch())
     }
     
     componentDidMount() {
