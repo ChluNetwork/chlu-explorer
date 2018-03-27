@@ -48,7 +48,7 @@ class App extends Component {
                   />
                   <Route
                     path='/'
-                    render={props => <Home reviewRecords={reviewRecordList} chluIpfs={chluIpfs} />}
+                    render={props => <Home reviewRecords={reviewRecordList} chluIpfs={chluIpfs} {...props}/>}
                   />
                 </Switch>
               }
