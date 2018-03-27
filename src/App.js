@@ -19,7 +19,6 @@ class App extends Component {
   render() {
     const {
       chluIpfs,
-      reviewRecords,
       reviewRecordList,
       debugLog,
       peers,

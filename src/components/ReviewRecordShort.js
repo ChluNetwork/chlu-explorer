@@ -1,6 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { Card, Icon, Rating, Button } from 'semantic-ui-react'
+import { Card, Icon, Rating } from 'semantic-ui-react'
 
 export default function ReviewRecordShort({ error, loading, multihash, ...props }) {
     return <Card fluid href={'#/v/' + multihash}>

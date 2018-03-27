@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Dimmer, Loader } from 'semantic-ui-react'
 
 export default function Loading({ loading, message }) {

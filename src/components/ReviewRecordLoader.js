@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, Card } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import ReviewRecordDetail from './ReviewRecordDetail'
 import ReviewRecordShort from './ReviewRecordShort'
@@ -18,7 +18,7 @@ export default class ReviewRecordLoader extends Component {
 
     render() {
         const { loading, reviewRecord, error } = this.state
-        const { multihash, short = false } = this.props
+        const { short = false } = this.props
         if (short) {
             return <ReviewRecordShort error={error} loading={loading} {...reviewRecord} />
         } else if (loading && !error) {
