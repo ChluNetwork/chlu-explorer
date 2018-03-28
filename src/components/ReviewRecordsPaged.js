@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { Button } from 'semantic-ui-react'
 import ReviewRecords from './ReviewRecords'
 
+const defaultPerPage = 5
+
 export default class ReviewRecordsPaged extends Component {
     constructor(props) {
         super(props)
@@ -9,8 +11,8 @@ export default class ReviewRecordsPaged extends Component {
     }
 
     render () {
-        const { reviewRecords, perPage = 5, chluIpfs } = this.props
-        const maxPages = Math.ceil(reviewRecords.length / perPage)
+        const { reviewRecords, perPage = defaultPerPage, chluIpfs } = this.props
+        const maxPages = this.getMaxPages()
         const { page } = this.state
         return <div style={this.props.style}>
             <ReviewRecords
@@ -22,16 +24,24 @@ export default class ReviewRecordsPaged extends Component {
             />
             <div className="ui two buttons">
                 <Button onClick={this.previousPage.bind(this)} disabled={page <= 1} icon="left arrow" content="Previous" labelPosition="left"/>
-                <Button onClick={this.nextPage.bind(this)} disabled={page === maxPages} icon="right arrow" content="Next" labelPosition="right"/>
+                <Button onClick={this.nextPage.bind(this)} disabled={page >= maxPages} icon="right arrow" content="Next" labelPosition="right"/>
             </div>
         </div>
     }
 
     nextPage() {
-        this.setState({ page: this.state.page + 1 })
+        if (this.state.page < this.getMaxPages()) {
+            this.setState({ page: this.state.page + 1 })
+        }
     }
 
     previousPage() {
-        this.setState({ page: this.state.page - 1 })
+        if (this.state.page > 1) {
+            this.setState({ page: this.state.page - 1 })
+        }
+    }
+
+    getMaxPages() {
+        return Math.max(1, Math.ceil(this.props.reviewRecords.length / (this.props.perPage || defaultPerPage)))
     }
 }

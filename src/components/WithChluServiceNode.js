@@ -28,7 +28,6 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             peers: [],
             ipfsPeers: [],
             bitswapPeers: [],
-            dbs: [],
             counter: 0,
             reviewRecordList: [],
             loading: true

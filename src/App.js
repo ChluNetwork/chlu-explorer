@@ -7,7 +7,7 @@ import EventLog from './components/EventLog'
 import InternalEvent from './components/InternalEvent'
 import ReviewRecordLoader from './components/ReviewRecordLoader'
 import Loading from './components/Loading'
-import { HashRouter as Router, Route, Switch } from 'react-router-dom'
+import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 
 const visibleMessageTypes = [
   messageTypes.INFO,
@@ -42,8 +42,16 @@ class App extends Component {
               { !loading &&
                 <Switch>
                   <Route
-                    path='/v/:m'
+                    path='/reviewrecord/:m'
+                    render={({match}) => <ReviewRecordLoader multihash={match.params.m} chluIpfs={chluIpfs} getLatestVersion={false} />}
+                  />
+                  <Route
+                    path='/review/:m'
                     render={({match}) => <ReviewRecordLoader multihash={match.params.m} chluIpfs={chluIpfs} />}
+                  />
+                  <Route
+                    path='/v/:m'
+                    render={({match}) => <Redirect to={'/review/' + match.params.m} />}
                   />
                   <Route
                     path='/'

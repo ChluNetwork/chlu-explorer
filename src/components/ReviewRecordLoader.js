@@ -42,12 +42,18 @@ export default class ReviewRecordLoader extends Component {
         })
     }
 
-    async fetch() {
-        const { multihash, chluIpfs } = this.props
+    async fetch(multihash, getLatestVersion = true) {
+        const { chluIpfs } = this.props
         try {
             const reviewRecord = await chluIpfs.readReviewRecord(multihash, {
-                getLatestVersion: true
+                getLatestVersion
             })
+            // TODO: maybe this next step should be done by ChluIPFS?
+            if (getLatestVersion) {
+                reviewRecord.lastVersionMultihash = reviewRecord.multihash
+            } else {
+                reviewRecord.lastVersionMultihash = await chluIpfs.instance.orbitDb.get(multihash)
+            }
             this.setState({ reviewRecord, loading: false })
         } catch (error) {
             this.setState({ error, loading: false })
@@ -55,10 +61,12 @@ export default class ReviewRecordLoader extends Component {
     }
 
     componentWillReceiveProps(next) {
-        if (this.props.multihash !== next.multihash) this.reset().then(this.fetch())
+        if (this.props.multihash !== next.multihash || this.props.getLatestVersion !== next.getLatestVersion) {
+            this.reset().then(this.fetch(next.multihash, next.getLatestVersion))
+        }
     }
     
     componentDidMount() {
-        this.fetch()
+        this.fetch(this.props.multihash, this.props.getLatestVersion)
     }
 }

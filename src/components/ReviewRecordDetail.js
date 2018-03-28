@@ -1,27 +1,52 @@
 import React from 'react'
-import { Card, Icon, Rating } from 'semantic-ui-react'
+import moment from 'moment'
+import { Link } from 'react-router-dom'
+import { Card, Icon, Rating, Button } from 'semantic-ui-react'
 
 export default function ReviewRecord({ error, ...props }) {
     const reviewEmpty = !(props.rating > 0 || props.review_text)
     return <Card.Group>
         <Card fluid>
             <Card.Content>
-                <Card.Header>Review Record</Card.Header>
+                <Card.Header>Requested Record</Card.Header>
                 <Card.Meta style={{wordBreak:'break-all'}}>{props.requestedMultihash}</Card.Meta>
             </Card.Content>
             {!error && <Card.Content>
-                <Icon name="code" /> Latest Version
-                <br/><span style={{wordBreak:'break-all'}}>{props.multihash}</span>
-                <br/><Icon name="history" /> Previous Version
+                <Icon name="check" /> Signed by Customer
+                <br/><Icon name="key" /> Customer Key
+                <br/><span style={{wordBreak:'break-all'}}>{props.key_location}</span>
+            </Card.Content> }
+            {!error && <Card.Content>
+                <Card.Header>Versions</Card.Header>
+                <Icon name="code" /> Latest
+                <br/><span style={{wordBreak:'break-all'}}>
+                    {props.lastVersionMultihash === props.multihash ? 'You are viewing the latest version' : props.lastVersionMultihash}
+                </span>
+                <br/><Icon name="history" /> Previous
                 <br/><span style={{wordBreak:'break-all'}}>{props.previous_version_multihash || 'None'}</span>
             </Card.Content> }
+            {!error && <div className="ui two buttons">
+                <Button
+                    icon="history"
+                    content="Previous Version"
+                    as={Link} to={'/reviewrecord/' + props.previous_version_multihash}
+                    disabled={error || !props.previous_version_multihash}
+                />
+                <Button
+                    icon="clock"
+                    content="Latest Version"
+                    as={Link} to={'/review/' + props.lastVersionMultihash}
+                    disabled={error || (props.requestedMultihash === props.lastVersionMultihash)}
+                />
+            </div> }
             {error && <Card.Content style={{wordBreak:'break-all'}}>
+                <Card.Header>Error</Card.Header>
                 <Icon name="ban" /> {error.message || error}
             </Card.Content> }
         </Card>
         {!error && <Card fluid>
             <Card.Content>
-                <Card.Header>Review Data</Card.Header>
+                <Card.Header>Review</Card.Header>
                 {reviewEmpty && <Card.Meta>Empty</Card.Meta>}
             </Card.Content>
             {props.rating > 0 && <Card.Content>
@@ -32,6 +57,28 @@ export default function ReviewRecord({ error, ...props }) {
                 <Icon name="comment" /> Comment
                 <br/>{props.review_text || '(no comment left)'}
             </Card.Content>}
+        </Card> }
+        {!error && <Card fluid>
+            <Card.Content>
+                <Card.Header>Payment Request</Card.Header>
+            </Card.Content>
+            <Card.Content>
+                <Icon name="check" /> Signed by Marketplace and Vendor
+                <br/><Icon name="chain" /> Marketplace
+                <br/><span style={{wordBreak:'break-all'}}>{props.popr.marketplace_url}</span>
+            </Card.Content>
+            <Card.Content>
+                <Icon name="clock" /> Created At
+                <br/>{moment(props.popr.created_at).format('LLL')}
+                <br/><Icon name="clock" /> Expires
+                <br/>{props.popr.expires_at ? moment(props.popr.expires_at).format('LLL') : 'Never'}
+            </Card.Content>
+            <Card.Content>
+                <Icon name="key" /> Marketplace/Vendor
+                <br/><span style={{wordBreak:'break-all'}}>{props.popr.key_location}</span>
+                <br/><Icon name="key" /> Vendor
+                <br/><span style={{wordBreak:'break-all'}}>{props.popr.vendor_key_location}</span>
+            </Card.Content>
         </Card> }
         {!error && <Card fluid>
             <Card.Content>
