@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import WithChluServiceNode, { messageTypes } from './components/WithChluServiceNode'
+import WithChluServiceNode from './components/WithChluServiceNode'
 import Home from './components/Home'
 import Stats from './components/Stats'
 import { Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
@@ -9,12 +9,6 @@ import ReviewRecordLoader from './components/ReviewRecordLoader'
 import Loading from './components/Loading'
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 
-const visibleMessageTypes = [
-  messageTypes.INFO,
-  messageTypes.WARN,
-  messageTypes.ERROR
-]
-
 class App extends Component {
   render() {
     const {
@@ -23,7 +17,8 @@ class App extends Component {
       debugLog,
       peers,
       ipfsPeers,
-      bitswapPeers,
+      libp2pPeers,
+      lastReplicated,
       id,
       loading
     } = this.props
@@ -64,13 +59,14 @@ class App extends Component {
                   reviewRecordList={reviewRecordList}
                   peerCount={peers.length}
                   ipfsPeerCount={ipfsPeers.length}
-                  bitswapPeerCount={bitswapPeers.length}
+                  libp2pPeerCount={libp2pPeers.length}
+                  lastReplicated={lastReplicated}
                   id={id}
                 />
               </Rail>
               <Rail position='right'>
                 <Segment>
-                  <EventLog eventLog={debugLog} types={visibleMessageTypes} Component={InternalEvent}/>
+                  <EventLog eventLog={debugLog} Component={InternalEvent}/>
                 </Segment>
               </Rail>
             </Grid.Column>

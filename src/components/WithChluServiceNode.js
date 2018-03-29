@@ -10,6 +10,8 @@ export const messageTypes = {
     ERROR: 'Error',
 }
 
+export const allowedMessageTypes = ['INFO', 'WARN', 'ERROR']
+
 function getTime() {
     return Date.now()
 }
@@ -27,9 +29,10 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             eventLog: [],
             peers: [],
             ipfsPeers: [],
-            bitswapPeers: [],
+            libp2pPeers: [],
             counter: 0,
             reviewRecordList: [],
+            lastReplicated: null,
             loading: true
         }
     }
@@ -53,7 +56,10 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         await this.refreshReviewRecords()
         const chluIpfs = this.state.chluIpfs
         chluIpfs.instance.events.on('message', this.handleMessage.bind(this))
-        chluIpfs.instance.events.on('replicated', this.refreshReviewRecords.bind(this))
+        chluIpfs.instance.events.on('replicated', () => {
+            this.refreshReviewRecords()
+            this.updateLastReplicatedTime()
+        })
         const interval = setInterval(this.poll.bind(this), 1000)
         this.setState({ interval });
         this.log(messageTypes.INFO, 'Chlu Explorer is ready')
@@ -66,23 +72,30 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     }
 
     log(type, msg) {
-        const { debugLog, counter } = this.state
-        const time = getTime();
-        const item = { type, msg, key: counter, time }
-        this.setState({
-            debugLog: trimArray([item].concat(debugLog), maxLogLength),
-            counter: counter + 1
-        })
+        if (allowedMessageTypes.map(x => messageTypes[x]).indexOf(type) >= 0) {
+            const { debugLog, counter } = this.state
+            const time = getTime();
+            const item = { type, msg, key: counter, time }
+            this.setState({
+                debugLog: trimArray([item].concat(debugLog), maxLogLength),
+                counter: counter + 1
+            })
+        }
     }
 
     async poll() {
         const { chluIpfs } = this.state;
         const src = chluIpfs.instance;
         const peers = await src.room.getPeers()
-        const ipfsPeers = await src.ipfs.swarm.peers()
-        const bitswapPeers = (await src.ipfs.bitswap.stat()).peers || []
-        const reviewRecordList = await src.orbitDb.getReviewRecordList();
-        this.setState({ peers, ipfsPeers, bitswapPeers, reviewRecordList })
+        const libp2pPeers = await src.ipfs.swarm.peers()
+        const ipfsPeers = (await src.ipfs.bitswap.stat()).peers || []
+        this.setState({ peers, ipfsPeers, libp2pPeers })
+    }
+
+    async updateLastReplicatedTime() {
+        this.setState({
+            lastReplicated: getTime()
+        })
     }
 
     async refreshReviewRecords() {
@@ -115,8 +128,9 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             debugLog={this.state.debugLog}
             peers={this.state.peers}
             ipfsPeers={this.state.ipfsPeers}
-            bitswapPeers={this.state.bitswapPeers}
+            libp2pPeers={this.state.libp2pPeers}
             reviewRecordList={this.state.reviewRecordList}
+            lastReplicated={this.state.lastReplicated}
         />
     }
 }

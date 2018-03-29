@@ -1,7 +1,16 @@
 import React from 'react'
+import moment from 'moment'
 import { Card, Icon } from 'semantic-ui-react'
 
-export default function Stats({ reviewRecordList, dbCount, peerCount, ipfsPeerCount, bitswapPeerCount, id }) {
+export default function Stats(props) {
+    const {
+        reviewRecordList,
+        peerCount,
+        ipfsPeerCount,
+        libp2pPeerCount,
+        id,
+        lastReplicated
+    } = props
     const reviewRecordCount = reviewRecordList.length
     return <Card.Group>
         <Card>
@@ -16,9 +25,9 @@ export default function Stats({ reviewRecordList, dbCount, peerCount, ipfsPeerCo
                 <Icon name="bitcoin" /> No blockchain access
             </Card.Content>
             <Card.Content extra>
-                <Icon name="user" /> {peerCount} nodes
-                <br/>
-                <Icon name="file" /> {reviewRecordCount} reviews
+                <Icon name="feed" /> {peerCount} Chlu peers
+                <br/><Icon name="database" /> {reviewRecordCount} reviews
+                <br/><Icon name="clock" /> Last Update: {lastReplicated ? moment(lastReplicated).format('LTS') : 'Never'}
             </Card.Content>
         </Card> 
         <Card>
@@ -31,9 +40,9 @@ export default function Stats({ reviewRecordList, dbCount, peerCount, ipfsPeerCo
                 <Icon name="id card" /> {id}
             </Card.Content>
             <Card.Content extra>
-                <Icon name="user" /> {ipfsPeerCount} swarm peers
+                <Icon name="server" /> {libp2pPeerCount} libp2p peers
                 <br/>
-                <Icon name="user" /> {bitswapPeerCount} bitswap peers
+                <Icon name="cube" /> {ipfsPeerCount} IPFS peers
             </Card.Content>
         </Card> 
     </Card.Group>
