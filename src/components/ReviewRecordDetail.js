@@ -63,9 +63,24 @@ export default function ReviewRecord({ error, ...props }) {
                 <Card.Header>Payment Request</Card.Header>
             </Card.Content>
             <Card.Content>
-                <Icon name="check" /> Signed by Marketplace and Vendor
-                <br/><Icon name="chain" /> Marketplace
-                <br/><span style={{wordBreak:'break-all'}}>{props.popr.marketplace_url}</span>
+                <Icon name="tag" /> Item ID
+                <br/>{props.popr.item_id}
+                <br/><Icon name="tag" /> Customer ID
+                <br/>{props.popr.customer_id}
+                <br/><Icon name="tag" /> Invoice ID
+                <br/>{props.popr.invoice_id}
+                <br/><Icon name="payment" /> Amount
+                <br/>{props.popr.amount + ' ' + props.popr.currency_symbol}
+            </Card.Content>
+            <Card.Content>
+                <Icon name="chain" /> Marketplace
+                <br/><span style={{wordBreak:'break-all'}}>
+                    <a href={props.popr.marketplace_url}>{props.popr.marketplace_url}</a>
+                </span>
+                <br/><Icon name="chain" /> Vendor
+                <br/><span style={{wordBreak:'break-all'}}>
+                    <a href={props.popr.marketplace_vendor_url}>{props.popr.marketplace_vendor_url}</a>
+                </span>
             </Card.Content>
             <Card.Content>
                 <Icon name="clock" /> Created At
@@ -74,7 +89,8 @@ export default function ReviewRecord({ error, ...props }) {
                 <br/>{props.popr.expires_at ? moment(props.popr.expires_at).format('LLL') : 'Never'}
             </Card.Content>
             <Card.Content>
-                <Icon name="key" /> Marketplace/Vendor
+                <Icon name="check" /> Signed by Marketplace and Vendor
+                <br/><Icon name="key" /> Marketplace/Vendor
                 <br/><span style={{wordBreak:'break-all'}}>{props.popr.key_location}</span>
                 <br/><Icon name="key" /> Vendor
                 <br/><span style={{wordBreak:'break-all'}}>{props.popr.vendor_key_location}</span>

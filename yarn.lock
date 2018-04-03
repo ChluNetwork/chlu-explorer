@@ -1600,12 +1600,13 @@ chardet@^0.4.0:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.4.2.tgz#b5473b33dc97c424e5d98dc87d55d4d8a29c8bf2"
 
-"chlu-ipfs-support@https://github.com/ChluNetwork/chlu-ipfs-support#single-db":
+"chlu-ipfs-support@https://github.com/ChluNetwork/chlu-ipfs-support#networks":
   version "0.1.0"
-  resolved "https://github.com/ChluNetwork/chlu-ipfs-support#4d5c9fbbaf053a42be470890ec16a5dd839ebc38"
+  resolved "https://github.com/ChluNetwork/chlu-ipfs-support#18b5dcd9799e61bbef85b4c269971abd4b36b712"
   dependencies:
     axios "^0.18.0"
     bitcoinjs-lib "^3.3.2"
+    commander "^2.15.1"
     ipfs "~0.28.0"
     lodash "^4.17.5"
     orbit-db "~0.19.7"
@@ -1779,7 +1780,7 @@ commander@2.12.x:
   version "2.12.2"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.12.2.tgz#0f5946c427ed9ec0d91a46bb9def53e54650e555"
 
-commander@^2.11.0, commander@^2.9:
+commander@^2.11.0, commander@^2.15.1, commander@^2.9:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
 

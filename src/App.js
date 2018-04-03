@@ -56,6 +56,7 @@ class App extends Component {
               }
               <Rail position='left'>
                 <Stats
+                  chluIpfs={chluIpfs}
                   reviewRecordList={reviewRecordList}
                   peerCount={peers.length}
                   ipfsPeerCount={ipfsPeers.length}

@@ -4,6 +4,7 @@ import { Card, Icon } from 'semantic-ui-react'
 
 export default function Stats(props) {
     const {
+        chluIpfs,
         reviewRecordList,
         peerCount,
         ipfsPeerCount,
@@ -12,6 +13,7 @@ export default function Stats(props) {
         lastReplicated
     } = props
     const reviewRecordCount = reviewRecordList.length
+    const network = chluIpfs ? capitalizeFirstLetter(chluIpfs.instance.network || 'production') : ''
     return <Card.Group>
         <Card>
             <Card.Content>
@@ -21,8 +23,8 @@ export default function Stats(props) {
             </Card.Content>
             <Card.Content extra>
                 <Icon name="id card" /> Service Node
-                <br/>
-                <Icon name="bitcoin" /> No blockchain access
+                <br/><Icon name="wifi" /> {network ? network + ' Network' : 'Connecting...'}
+                <br/><Icon name="bitcoin" /> No blockchain access
             </Card.Content>
             <Card.Content extra>
                 <Icon name="feed" /> {peerCount} Chlu peers
@@ -46,4 +48,8 @@ export default function Stats(props) {
             </Card.Content>
         </Card> 
     </Card.Group>
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1)
 }
