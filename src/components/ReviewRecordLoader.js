@@ -46,7 +46,10 @@ export default class ReviewRecordLoader extends Component {
         const { chluIpfs } = this.props
         try {
             const reviewRecord = await chluIpfs.readReviewRecord(multihash, {
-                getLatestVersion
+                getLatestVersion,
+                validate: {
+                    throwErrors: false
+                }
             })
             // TODO: maybe this next step should be done by ChluIPFS?
             if (getLatestVersion) {
@@ -56,7 +59,13 @@ export default class ReviewRecordLoader extends Component {
             }
             this.setState({ reviewRecord, loading: false })
         } catch (error) {
-            this.setState({ error, loading: false })
+            this.setState({
+                error,
+                loading: false,
+                reviewRecord: {
+                    requestedMultihash: multihash
+                }
+            })
         }
     }
 

@@ -5,12 +5,23 @@ import { Card, Icon, Rating, Button } from 'semantic-ui-react'
 
 export default function ReviewRecord({ error, ...props }) {
     const reviewEmpty = !(props.rating > 0 || props.review_text)
+    const hasErrors = props.errors && props.errors.length > 0
     return <Card.Group>
         <Card fluid>
             <Card.Content>
                 <Card.Header>Requested Record</Card.Header>
                 <Card.Meta style={{wordBreak:'break-all'}}>{props.requestedMultihash}</Card.Meta>
             </Card.Content>
+            {error && <Card.Content style={{wordBreak:'break-all'}}>
+                <Card.Header>Error</Card.Header>
+                <Icon name="ban" /> {error.message || error}
+            </Card.Content> }
+            {hasErrors && <Card.Content style={{wordBreak:'break-all'}}>
+                <Card.Header>Validation Errors</Card.Header>
+                <Card.Content>
+                    <ul>{props.errors.map(e => <li key={e}>{e.message || e}</li>)}</ul>
+                </Card.Content>
+            </Card.Content> }
             {!error && <Card.Content>
                 <Icon name="check" /> Signed by Customer
                 <br/><Icon name="key" /> Customer Key
@@ -39,10 +50,6 @@ export default function ReviewRecord({ error, ...props }) {
                     disabled={error || (props.requestedMultihash === props.lastVersionMultihash)}
                 />
             </div> }
-            {error && <Card.Content style={{wordBreak:'break-all'}}>
-                <Card.Header>Error</Card.Header>
-                <Icon name="ban" /> {error.message || error}
-            </Card.Content> }
         </Card>
         {!error && <Card fluid>
             <Card.Content>
