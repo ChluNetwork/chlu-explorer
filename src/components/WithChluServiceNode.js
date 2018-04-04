@@ -44,7 +44,11 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             warn: x => this.log(messageTypes.WARN, x),
             error: x => this.log(messageTypes.ERROR, x)
         }
-        const chluIpfs = new ChluIPFS({ type: ChluIPFS.types.service, logger })
+        const chluIpfs = new ChluIPFS({
+            type: ChluIPFS.types.service,
+            logger,
+            network: ChluIPFS.networks.staging
+        })
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
         const { id } = await chluIpfs.instance.ipfs.id()
