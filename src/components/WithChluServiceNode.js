@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import ChluIPFS from 'chlu-ipfs-support/src'
+import ChluIPFS from 'chlu-ipfs-support'
 
-export const maxLogLength = 50;
+export const maxLogLength = 500;
 
 export const messageTypes = {
     DEBUG: 'Debug Message',
@@ -9,6 +9,8 @@ export const messageTypes = {
     WARN: 'Warning',
     ERROR: 'Error',
 }
+
+export const allowedMessageTypes = ['INFO', 'WARN', 'ERROR']
 
 function getTime() {
     return Date.now()
@@ -27,10 +29,10 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             eventLog: [],
             peers: [],
             ipfsPeers: [],
-            bitswapPeers: [],
-            dbs: [],
+            libp2pPeers: [],
             counter: 0,
-            reviewRecords: [],
+            reviewRecordList: [],
+            lastReplicated: null,
             loading: true
         }
     }
@@ -42,14 +44,29 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             warn: x => this.log(messageTypes.WARN, x),
             error: x => this.log(messageTypes.ERROR, x)
         }
-        const chluIpfs = new ChluIPFS({ type: ChluIPFS.types.service, logger })
+        const chluIpfs = new ChluIPFS({
+            type: ChluIPFS.types.service,
+            logger,
+            network: ChluIPFS.networks.staging
+        })
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
         const { id } = await chluIpfs.instance.ipfs.id()
-        chluIpfs.instance.room.room.on('message', this.handleMessage.bind(this))
+        this.setState({ chluIpfs, id, loading: false }, this.init.bind(this))
+    }
+
+    async init() {
+        await this.poll()
+        await this.refreshReviewRecords()
+        const chluIpfs = this.state.chluIpfs
+        chluIpfs.instance.events.on('message', this.handleMessage.bind(this))
+        chluIpfs.instance.events.on('replicated', () => {
+            this.refreshReviewRecords()
+            this.updateLastReplicatedTime()
+        })
         const interval = setInterval(this.poll.bind(this), 1000)
-        this.setState({ chluIpfs, id, interval, loading: false })
-        this.log(messageTypes.INFO, 'Chlu Dashboard is ready')
+        this.setState({ interval });
+        this.log(messageTypes.INFO, 'Chlu Explorer is ready')
     }
 
     async componentWillUnmount() {
@@ -59,108 +76,48 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     }
 
     log(type, msg) {
-        const { debugLog, counter } = this.state
-        const time = getTime();
-        const item = { type, msg, key: counter, time }
-        this.setState({
-            debugLog: trimArray([item].concat(debugLog), maxLogLength),
-            counter: counter + 1
-        })
+        if (allowedMessageTypes.map(x => messageTypes[x]).indexOf(type) >= 0) {
+            const { debugLog, counter } = this.state
+            const time = getTime();
+            const item = { type, msg, key: counter, time }
+            this.setState({
+                debugLog: trimArray([item].concat(debugLog), maxLogLength),
+                counter: counter + 1
+            })
+        }
     }
 
     async poll() {
         const { chluIpfs } = this.state;
         const src = chluIpfs.instance;
-        const dbs = Object.keys(src.dbs || {}).map(address => {
-            // TODO: collect db information
-            return {
-                address
-            }
-        })
-        const peers = src.room.room.getPeers()
-        const ipfsPeers = await src.ipfs.swarm.peers()
-        const bitswapPeers = src.ipfs.bitswap.stat().peers || []
-        this.setState({ dbs, peers, ipfsPeers, bitswapPeers })
+        const peers = await src.room.getPeers()
+        const libp2pPeers = await src.ipfs.swarm.peers()
+        const ipfsPeers = (await src.ipfs.bitswap.stat()).peers || []
+        this.setState({ peers, ipfsPeers, libp2pPeers })
     }
 
-    async handleMessage(message) {
+    async updateLastReplicatedTime() {
+        this.setState({
+            lastReplicated: getTime()
+        })
+    }
+
+    async refreshReviewRecords() {
+        const reviewRecordList = await this.state.chluIpfs.instance.orbitDb.getReviewRecordList()
+        this.setState({ reviewRecordList })
+    }
+
+    async handleMessage(msg) {
         const { eventLog, counter } = this.state;
         try {
-            const msg = JSON.parse(message.data.toString())
             msg.time = getTime()
             msg.key = counter
             this.setState({
                 counter: counter + 1,
                 eventLog: trimArray([msg].concat(eventLog), maxLogLength)
             })
-            if (msg.multihash && msg.type === 'PINNED') {
-                this.readReviewRecord(msg.multihash)
-            }
         } catch (error) {
             console.log('error', error)
-        }
-    }
-
-    async readReviewRecord(multihash) {
-        const { chluIpfs, reviewRecords } = this.state
-        if (reviewRecords.filter(r => r.multihash === multihash).length === 0) {
-            try {
-                const reviewRecord = await chluIpfs.readReviewRecord(multihash)
-                reviewRecord.multihash = multihash
-                reviewRecord.time = getTime()
-                this.setState({
-                    reviewRecords: trimArray([reviewRecord].concat(reviewRecords), 100)
-                })
-            } catch (error) {
-                console.log('Error while reading RR:', error)
-            }
-        }
-    }
-
-    async storeExampleReviewRecord() {
-        const amount = parseInt(Math.random() * 10000 + 10, 10)
-        const rating = parseInt(Math.random() + 4 + 1, 10)
-        const reviewRecord = {
-            currency_symbol: 'USD',
-            amount,
-            customer_address: 'customer_address',
-            vendor_address: 'vendor_address',
-            review_text: 'it was a really nice item',
-            rating,
-            detailed_review: [],
-            popr: {
-                item_id: 'item_id',
-                invoice_id: 'invoice_id',
-                customer_id: 'customer_id',
-                created_at: 12345,
-                expires_at: 34567,
-                currency_symbol: 'USD',
-                amount,
-                marketplace_url: 'chlu.io',
-                marketplace_vendor_url: 'chlu.io',
-                key_location: '/ipfs/url',
-                chlu_version: 0,
-                attributes: [
-                    {
-                        name: 'score',
-                        min_rating: 1,
-                        max_rating: 5,
-                        description: 'rating',
-                        is_required: true
-                    }
-                ],
-                signature: '-'
-            },
-            orbitDb: '/orbitdb/ipfshash/chlu-experimental-customer-review-updates',
-            last_reviewrecord_multihash: '',
-            chlu_version: 0,
-            hash: '-'
-        }
-        const { chluIpfs } = this.state 
-        try {
-            await chluIpfs.storeReviewRecord(reviewRecord)
-        } catch (error) {
-            console.log('ERROR', error)
         }
     }
 
@@ -175,10 +132,9 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             debugLog={this.state.debugLog}
             peers={this.state.peers}
             ipfsPeers={this.state.ipfsPeers}
-            bitswapPeers={this.state.bitswapPeers}
-            reviewRecords={this.state.reviewRecords}
-            readReviewRecord={this.readReviewRecord.bind(this)}
-            storeExampleReviewRecord={this.storeExampleReviewRecord.bind(this)}
+            libp2pPeers={this.state.libp2pPeers}
+            reviewRecordList={this.state.reviewRecordList}
+            lastReplicated={this.state.lastReplicated}
         />
     }
 }

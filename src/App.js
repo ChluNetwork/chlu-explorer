@@ -1,59 +1,79 @@
 import React, { Component } from 'react';
-import WithChluServiceNode, { messageTypes } from './components/WithChluServiceNode'
-import ReviewRecords from './components/ReviewRecords'
+import WithChluServiceNode from './components/WithChluServiceNode'
+import Home from './components/Home'
 import Stats from './components/Stats'
-import { Dimmer, Button, Loader, Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
+import { Grid, Segment, Rail, Icon, Header, Container } from 'semantic-ui-react'
 import EventLog from './components/EventLog'
-import Form from './components/Form'
 import InternalEvent from './components/InternalEvent'
-
-const visibleMessageTypes = [
-  messageTypes.INFO,
-  messageTypes.WARN,
-  messageTypes.ERROR
-]
+import ReviewRecordLoader from './components/ReviewRecordLoader'
+import Loading from './components/Loading'
+import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 
 class App extends Component {
   render() {
     const {
-      reviewRecords,
-      readReviewRecord,
+      chluIpfs,
+      reviewRecordList,
       debugLog,
       peers,
       ipfsPeers,
-      bitswapPeers,
-      dbs,
+      libp2pPeers,
+      lastReplicated,
       id,
-      loading,
-      storeExampleReviewRecord
+      loading
     } = this.props
     return (
-      <Container>
-        <Header as='h2' icon textAlign='center' style={{marginTop:'1rem'}}>
-          <Icon name='settings' circular />
-          <Header.Content>
-            Chlu Explorer
-          </Header.Content>
-        </Header>
-        <Grid centered columns={3}>
-          <Grid.Column>
-            <Dimmer active={loading} inverted style={{marginTop:'2rem'}}>
-              <Loader inverted>Connecting to Chlu</Loader>
-            </Dimmer>
-            { !loading && <Form onSubmit={fields => readReviewRecord(fields.multihash)} style={{marginBottom:'1.5em'}}/> }
-            <ReviewRecords reviewRecords={reviewRecords} />
-            <Rail position='left'>
-              <Stats dbCount={dbs.length} peerCount={peers.length} ipfsPeerCount={ipfsPeers.length} bitswapPeerCount={bitswapPeers.length} id={id} />
-              <Button fluid onClick={storeExampleReviewRecord} style={{marginTop:'1.5rem'}}>Create Fake Review Record</Button>
-            </Rail>
-            <Rail position='right'>
-              <Segment>
-                <EventLog eventLog={debugLog} types={visibleMessageTypes} Component={InternalEvent}/>
-              </Segment>
-            </Rail>
-          </Grid.Column>
-        </Grid>
-      </Container>
+      <Router>
+        <Container>
+          <Header as='h2' icon textAlign='center' style={{marginTop:'1rem'}}>
+            <Icon name='settings' circular />
+            <Header.Content>
+              Chlu Explorer
+            </Header.Content>
+          </Header>
+          <Grid centered columns={3}>
+            <Grid.Column>
+              <Loading message='Starting up' loading={loading} />
+              { !loading &&
+                <Switch>
+                  <Route
+                    path='/reviewrecord/:m'
+                    render={({match}) => <ReviewRecordLoader multihash={match.params.m} chluIpfs={chluIpfs} getLatestVersion={false} />}
+                  />
+                  <Route
+                    path='/review/:m'
+                    render={({match}) => <ReviewRecordLoader multihash={match.params.m} chluIpfs={chluIpfs} />}
+                  />
+                  <Route
+                    path='/v/:m'
+                    render={({match}) => <Redirect to={'/review/' + match.params.m} />}
+                  />
+                  <Route
+                    path='/'
+                    render={props => <Home reviewRecords={reviewRecordList} chluIpfs={chluIpfs} {...props}/>}
+                  />
+                </Switch>
+              }
+              <Rail position='left'>
+                <Stats
+                  chluIpfs={chluIpfs}
+                  reviewRecordList={reviewRecordList}
+                  peerCount={peers.length}
+                  ipfsPeerCount={ipfsPeers.length}
+                  libp2pPeerCount={libp2pPeers.length}
+                  lastReplicated={lastReplicated}
+                  id={id}
+                />
+              </Rail>
+              <Rail position='right'>
+                <Segment>
+                  <EventLog eventLog={debugLog} Component={InternalEvent}/>
+                </Segment>
+              </Rail>
+            </Grid.Column>
+          </Grid>
+        </Container>
+      </Router>
     );
   }
 }

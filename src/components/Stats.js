@@ -1,7 +1,19 @@
 import React from 'react'
+import moment from 'moment'
 import { Card, Icon } from 'semantic-ui-react'
 
-export default function Stats({ dbCount, peerCount, ipfsPeerCount, bitswapPeerCount, id }) {
+export default function Stats(props) {
+    const {
+        chluIpfs,
+        reviewRecordList,
+        peerCount,
+        ipfsPeerCount,
+        libp2pPeerCount,
+        id,
+        lastReplicated
+    } = props
+    const reviewRecordCount = reviewRecordList.length
+    const network = chluIpfs ? capitalizeFirstLetter(chluIpfs.instance.network || 'production') : ''
     return <Card.Group>
         <Card>
             <Card.Content>
@@ -11,11 +23,13 @@ export default function Stats({ dbCount, peerCount, ipfsPeerCount, bitswapPeerCo
             </Card.Content>
             <Card.Content extra>
                 <Icon name="id card" /> Service Node
-                <br/>
-                <Icon name="bitcoin" /> No blockchain access
+                <br/><Icon name="wifi" /> {network ? network + ' Network' : 'Connecting...'}
+                <br/><Icon name="bitcoin" /> No blockchain access
             </Card.Content>
             <Card.Content extra>
-                <Icon name="user" /> {peerCount} nodes
+                <Icon name="feed" /> {peerCount} Chlu peers
+                <br/><Icon name="database" /> {reviewRecordCount} reviews
+                <br/><Icon name="clock" /> Last Update: {lastReplicated ? moment(lastReplicated).format('LTS') : 'Never'}
             </Card.Content>
         </Card> 
         <Card>
@@ -28,10 +42,14 @@ export default function Stats({ dbCount, peerCount, ipfsPeerCount, bitswapPeerCo
                 <Icon name="id card" /> {id}
             </Card.Content>
             <Card.Content extra>
-                <Icon name="user" /> {ipfsPeerCount} swarm peers
+                <Icon name="server" /> {libp2pPeerCount} libp2p peers
                 <br/>
-                <Icon name="user" /> {bitswapPeerCount} bitswap peers
+                <Icon name="cube" /> {ipfsPeerCount} IPFS peers
             </Card.Content>
         </Card> 
     </Card.Group>
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1)
 }
