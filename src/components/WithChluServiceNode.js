@@ -47,7 +47,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         const chluIpfs = new ChluIPFS({
             type: ChluIPFS.types.service,
             logger,
-            network: ChluIPFS.networks.staging
+            network: process.env.NODE_ENV === 'production' ? ChluIPFS.networks.staging : ChluIPFS.networks.experimental
         })
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
@@ -76,6 +76,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
     }
 
     log(type, msg) {
+        console.log('[' + type + '] ' + msg);
         if (allowedMessageTypes.map(x => messageTypes[x]).indexOf(type) >= 0) {
             const { debugLog, counter } = this.state
             const time = getTime();
