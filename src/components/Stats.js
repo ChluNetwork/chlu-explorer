@@ -10,7 +10,8 @@ export default function Stats(props) {
         ipfsPeerCount,
         libp2pPeerCount,
         id,
-        lastReplicated
+        lastReplicated,
+        blockchainAccess
     } = props
     const reviewRecordCount = reviewRecordList.length
     const network = chluIpfs ? capitalizeFirstLetter(chluIpfs.instance.network || 'production') : ''
@@ -24,7 +25,7 @@ export default function Stats(props) {
             <Card.Content extra>
                 <Icon name="id card" /> Service Node
                 <br/><Icon name="wifi" /> {network ? network + ' Network' : 'Connecting...'}
-                <br/><Icon name="bitcoin" /> No blockchain access
+                <br/><Icon name="bitcoin" /> {blockchainAccess ? 'Connected to Bitcoin blockchain' : 'No blockchain access'}
             </Card.Content>
             <Card.Content extra>
                 <Icon name="feed" /> {peerCount} Chlu peers

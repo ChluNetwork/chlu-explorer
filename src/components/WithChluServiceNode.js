@@ -33,7 +33,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             counter: 0,
             reviewRecordList: [],
             lastReplicated: null,
-            loading: true
+            loading: true,
+            blockchainAccess: false
         }
     }
 
@@ -47,7 +48,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         const chluIpfs = new ChluIPFS({
             type: ChluIPFS.types.service,
             logger,
-            network: process.env.NODE_ENV === 'production' ? ChluIPFS.networks.staging : ChluIPFS.networks.experimental
+            network: ChluIPFS.networks.staging,
+            //network: process.env.NODE_ENV === 'production' ? ChluIPFS.networks.staging : ChluIPFS.networks.experimental
         })
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
@@ -94,7 +96,8 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         const peers = await src.room.getPeers()
         const libp2pPeers = await src.ipfs.swarm.peers()
         const ipfsPeers = (await src.ipfs.bitswap.stat()).peers || []
-        this.setState({ peers, ipfsPeers, libp2pPeers })
+        const blockchainAccess = Boolean(src.bitcoin.ready)
+        this.setState({ peers, ipfsPeers, libp2pPeers, blockchainAccess })
     }
 
     async updateLastReplicatedTime() {
@@ -136,6 +139,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
             libp2pPeers={this.state.libp2pPeers}
             reviewRecordList={this.state.reviewRecordList}
             lastReplicated={this.state.lastReplicated}
+            blockchainAccess={this.state.blockchainAccess}
         />
     }
 }

@@ -19,6 +19,7 @@ class App extends Component {
       ipfsPeers,
       libp2pPeers,
       lastReplicated,
+      blockchainAccess,
       id,
       loading
     } = this.props
@@ -62,6 +63,7 @@ class App extends Component {
                   ipfsPeerCount={ipfsPeers.length}
                   libp2pPeerCount={libp2pPeers.length}
                   lastReplicated={lastReplicated}
+                  blockchainAccess={blockchainAccess}
                   id={id}
                 />
               </Rail>
