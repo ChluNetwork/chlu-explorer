@@ -48,8 +48,7 @@ const WithChluServiceNode = ComposedComponent => class extends Component {
         const chluIpfs = new ChluIPFS({
             type: ChluIPFS.types.service,
             logger,
-            network: ChluIPFS.networks.staging,
-            //network: process.env.NODE_ENV === 'production' ? ChluIPFS.networks.staging : ChluIPFS.networks.experimental
+            network: process.env.NODE_ENV === 'production' ? ChluIPFS.networks.staging : ChluIPFS.networks.experimental
         })
         if (window && !window.chluIpfs) window.chluIpfs = chluIpfs
         await chluIpfs.start()
